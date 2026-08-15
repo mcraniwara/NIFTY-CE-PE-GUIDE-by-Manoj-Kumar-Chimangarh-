@@ -25,10 +25,29 @@ jobs:
         with:
           gradle-version: '8.10'
 
+      - name: Check Android Project
+        run: |
+          echo "Project files:"
+          ls -la
+          echo "App folder:"
+          ls -la app || true
+
       - name: Build APK
-        run: gradle assembleDebug --no-daemon
+        run: |
+          if [ -f "./gradlew" ]; then
+            chmod +x ./gradlew
+            ./gradlew assembleDebug --no-daemon --stacktrace
+          else
+            gradle assembleDebug --no-daemon --stacktrace
+          fi
+
+      - name: Find APK
+        if: success()
+        run: |
+          find . -type f -name "*.apk" -print
 
       - name: Upload APK
+        if: success()
         uses: actions/upload-artifact@v4
         with:
           name: NIFTY-CE-PE-GUIDE-APK
