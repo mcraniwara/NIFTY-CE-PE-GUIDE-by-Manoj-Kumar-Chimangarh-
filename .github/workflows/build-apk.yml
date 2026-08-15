@@ -29,7 +29,7 @@ jobs:
         run: |
           rm -rf android-project
           mkdir android-project
-          unzip -o NIFTY_CE_PE_GUIDE_Android_v2.zip -d android-project
+          unzip -o NIFTY_CE_PE_GUIDE_Android_v3_Java17_FIXED.zip -d android-project
 
       - name: Locate Gradle project
         run: |
