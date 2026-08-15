@@ -25,30 +25,33 @@ jobs:
         with:
           gradle-version: '8.10'
 
-      - name: Check Android Project
+      - name: Extract new Android project
         run: |
-          echo "Project files:"
-          ls -la
-          echo "App folder:"
-          ls -la app || true
+          rm -rf android-project
+          mkdir android-project
+          unzip -o NIFTY_CE_PE_GUIDE_Android_v2.zip -d android-project
+
+      - name: Locate Gradle project
+        run: |
+          echo "Looking for Android project..."
+          find android-project -maxdepth 4 -name "settings.gradle.kts" -print
+          find android-project -maxdepth 4 -name "build.gradle.kts" -print
 
       - name: Build APK
         run: |
-          if [ -f "./gradlew" ]; then
-            chmod +x ./gradlew
-            ./gradlew assembleDebug --no-daemon --stacktrace
-          else
-            gradle assembleDebug --no-daemon --stacktrace
-          fi
+          PROJECT_DIR=$(find android-project -name "settings.gradle.kts" -print -quit | xargs dirname)
+          echo "Project directory: $PROJECT_DIR"
+          cd "$PROJECT_DIR"
+          gradle assembleDebug --no-daemon --stacktrace
 
       - name: Find APK
         if: success()
         run: |
-          find . -type f -name "*.apk" -print
+          find android-project -type f -name "*.apk" -print
 
       - name: Upload APK
         if: success()
         uses: actions/upload-artifact@v4
         with:
           name: NIFTY-CE-PE-GUIDE-APK
-          path: app/build/outputs/apk/debug/app-debug.apk
+          path: android-project/**/app/build/outputs/apk/debug/app-debug.apk
